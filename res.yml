@@ -1,0 +1,54 @@
+---
+- name: VM Resource Checker
+  hosts: '{{ target }}'
+  gather_facts: false
+
+  tasks:
+
+     - name: "Check CPU Threads"
+       shell: "cat /proc/cpuinfo | grep processor | wc -l"
+       register: shell_result
+       tags:
+          - cpu
+
+     - name: "Number of CPUs"
+       debug:
+         msg: "Total CPUs: {{ shell_result.stdout }}"
+       tags:
+          - cpu
+
+     - name: "Check RAM memory"
+       shell: "free -g | awk 'NR==2 {print $2}'"
+       register: shell_result
+       tags:
+          - ram
+
+     - name: "Total RAM:"
+       debug:
+         msg: "Total RAM: {{ shell_result.stdout }}"
+       tags:
+          - ram
+
+     - name: "Check total disk space - NATIVE"
+       shell: "df -lP | awk '{sum += $2} END {printf \"%d GiB\", sum/2**20}'"
+       register: shell_result
+       tags:
+          - disk_native
+
+     - name: "Total Disk Space - NATIVE"
+       debug:
+         msg: "Total Disk Space - NATIVE: {{ shell_result.stdout }}"
+       tags:
+          - disk_native
+
+     - name: "Check Disk Space - i2"
+       shell: "df -h  | awk 'NR==2 {print $2}'"
+       register: shell_result
+       tags:
+          - disk_i2
+
+     - name: "Total Disk Space - i2"
+       debug:
+         msg: "Total Disk Space: {{ shell_result.stdout }}"
+       tags:
+          - disk_i2
